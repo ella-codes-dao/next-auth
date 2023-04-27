@@ -29,11 +29,13 @@ import {
 
 import type {
   Adapter,
-  AdapterUser,
   AdapterAccount,
   AdapterSession,
   VerificationToken,
 } from "next-auth/adapters"
+
+// ** Custom RoleUser Type Import **//
+import type { RoleUser } from "./adapters"
 
 /** Configure the Firebase Adapter. */
 export interface FirebaseAdapterConfig extends AppOptions {
@@ -148,7 +150,7 @@ export function FirestoreAdapter(
 
   return {
     async createUser(userInit) {
-      const { id: userId } = await C.users.add(userInit as AdapterUser)
+      const { id: userId } = await C.users.add(userInit as RoleUser)
 
       const user = await getDoc(C.users.doc(userId))
       if (!user) throw new Error("[createUser] Failed to fetch created user")
@@ -304,6 +306,7 @@ const MAP_TO_FIRESTORE: Record<string, string | undefined> = {
   sessionToken: "session_token",
   providerAccountId: "provider_account_id",
   emailVerified: "email_verified",
+  role: "role",
 }
 const MAP_FROM_FIRESTORE: Record<string, string | undefined> = {}
 
@@ -405,7 +408,7 @@ export function collectionsFactory(
   return {
     users: db
       .collection("users")
-      .withConverter(getConverter<AdapterUser>({ preferSnakeCase })),
+      .withConverter(getConverter<RoleUser>({ preferSnakeCase })),
     sessions: db
       .collection("sessions")
       .withConverter(getConverter<AdapterSession>({ preferSnakeCase })),
